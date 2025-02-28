@@ -1,0 +1,23 @@
+{
+    "database": {
+        "host": "${MYSQL_HOST}",
+        "port": "3306",
+        "name": "${MYSQL_DATABASE}",
+        "user": "${MYSQL_USER}",
+        "password": "${MYSQL_PASSWORD}"
+    },
+    "feed": {
+        "default_timezone": "Europe/Berlin",
+        "max_hours": 8760,
+        "base_url": "${CALENDARFEED_FEED_BASEURL}"
+    },
+    "calendar_discovery": {
+        "unused_key_expiry_minutes": 1440,
+        "discovery_window_minutes": 1440
+    },
+    "caldav": {
+        "base_url": "${CALDAV_LOCAL_URL}",
+        "username": "${CALDAV_LOCAL_USERNAME}",
+        "password": "${CALDAV_LOCAL_PASSWORD}"
+    }
+}

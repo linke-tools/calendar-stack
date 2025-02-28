@@ -1,0 +1,9 @@
+{
+    "database": {
+        "host": "${MYSQL_HOST}",
+        "dbname": "${MYSQL_DATABASE}",
+        "username": "${MYSQL_USER}",
+        "password": "${MYSQL_PASSWORD}"
+    },
+    "timezone": "${TIMEZONE}"
+} 

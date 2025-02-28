@@ -1,0 +1,96 @@
+volumes:
+  db-sabredav:
+  sabredav:
+  pimsync:
+
+services:
+  db-calendarfeed:
+    image: mariadb
+    env_file: "./.secrets/db-calendarfeed.env"
+    restart: always
+    volumes:
+      - ./data/db-calendarfeed:/var/lib/mysql
+
+  calendarfeed:
+    image: calendarfeed
+    env_file: "./.secrets/calendarfeed.env"
+    restart: always
+    links:
+      - db-calendarfeed
+    volumes:
+      - ./config/calendarfeed/config.json:/config.json:ro
+
+  httpcall:
+    image: httpcall
+    restart: always
+    links:
+      - nginx
+    environment:
+        - URL=http://nginx:7001/discover_calendars.php
+        - INTERVAL=60
+
+
+  db-sabredav:
+    image: mariadb
+    env_file: "./.secrets/db-sabredav.env"
+    restart: always
+    volumes:
+      - db-sabredav:/var/lib/mysql
+
+
+  sabredav:
+    image: sabredav
+    env_file: "./.secrets/sabredav.env"
+    restart: always
+    links:
+      - db-sabredav
+    volumes:
+      - ./config/sabredav/config.json:/config.json:ro
+
+  nginx:
+    image: nginx
+    restart: always
+    links:
+      - sabredav
+      - calendarfeed
+    environment:
+      - LISTEN_IP4
+      - CERTBOT_DOMAIN
+    ports:
+      - 127.0.0.1:7000:7000
+      - 127.0.0.1:7001:7001
+      - ${LISTEN_IP4}:443:443
+    volumes:
+      - ./config/nginx/conf:/etc/nginx/templates/default.conf.template:ro
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+
+
+  pimsync:
+    image: pimsync
+    env_file: "./.secrets/pimsync.env"
+    restart: always
+    links:
+      - nginx
+    volumes:
+      - pimsync:/status
+      - ./config/pimsync/pimsync.conf:/pimsync.conf:ro
+
+  nginx-certbot:
+    image: nginx
+    restart: always
+    environment:
+      - LISTEN_IP4
+    ports:
+      - ${LISTEN_IP4}:80:80
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+      - ./config/nginx-certbot/conf:/etc/nginx/conf.d/default.conf:ro
+
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
