@@ -38,10 +38,8 @@ server {
 }
 
 server {
-	listen 443 ssl;
+	listen 7002;
 
-	ssl_certificate /etc/letsencrypt/live/${CERTBOT_DOMAIN}/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/${CERTBOT_DOMAIN}/privkey.pem;
 
 	root /calendarfeed-static;
 	index index.html;
