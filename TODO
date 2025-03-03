@@ -1,3 +1,1 @@
 Calendarfeed: Add Purge function to remove stale calendar URL from database (call it manually from time to time)
-SSL: Automatic renew of SSL cert
-Stack: Add IPv6 support
