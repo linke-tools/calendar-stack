@@ -3,31 +3,38 @@
 
 ## Clone and build the required docker images
 
+    # IMAGES="calendarfeed httpcall pimsync sabredav"
+    # for i in $IMAGES; do git clone https://github.com/linke-tools/$i-docker.git; done
+    # for i in $IMAGES; do docker build --no-cache -t $i "${i}-docker"; done
 
+## Configure and run the stack
 
-    # git clone https://github.com/linke-tools/httpcall-docker.git
-    # git clone https://github.com/linke-tools/sabredav-docker.git
-    # git clone https://github.com/linke-tools/pimsync-docker.git
-    # git clone https://github.com/linke-tools/calendarfeed-docker.git
-
-    # for i in calendarfeed httpcall pimsync sabredav; do docker build --no-cache -t $i "${i}-docker"; done
-
-## Configure an run the stack
-
-* Clone this image
+* Clone this image with `git clone https://github.com/linke-tools/calendar-stack.git`
 * `cd calendar-stack/`
 * Copy `env.example` to `.env`
 * Copy `.secrets.example` to `.secrets`
 * Configure the variables in `.env` and `.secrets/*`
 
-Create `/data` direcoties
+Create `/data` directory
 
-    # mkdir -p data/{certbot,db-calendarfeed}
-
-Initialize the certficates whith
-
-    # docker compose -f docker-compose-init.yml up
+    # mkdir -p data
 
 Start the stack
 
     # docker compose up -d
+
+Setup the frontend proxy
+
+## Migration
+
+The only statefull data to migrate are the connections between the keys and the internal calendar urls.
+
+###  Export connected calendars from database
+
+    # source .secrets/db-calendarfeed.env
+    # docker exec calendar-stack-calendarfeed-1 sh -c "mysqldump -u $MYSQL_USER -p$MYSQL_PASSWORD -h db-calendarfeed calendarfeed" > calendarfeed.sql
+
+### Import dump into fresh deployment
+
+    # source .secrets/db-calendarfeed.env
+    # docker exec -i calendar-stack-calendarfeed-1 sh -c "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -h db-calendarfeed calendarfeed" < calendarfeed.sql
